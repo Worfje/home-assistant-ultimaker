@@ -16,10 +16,15 @@ sensor:
       - bed_type (optional)
       - hotend_1_temperature (optional)
       - hotend_1_temperature_target (optional)
-      - hotend_1_temperature_id (optional)
+      - hotend_1_id (optional)
       - hotend_2_temperature (optional)
       - hotend_2_temperature_target (optional)
-      - hotend_2_temperature_id (optional)
+      - hotend_2_id (optional)
+      - active_material_1_guid (optional)
+      - active_material_1_length_remaining (optional)
+      - active_material_2_guid (optional)
+      - active_material_2_length_remaining (optional)
+      
 """
 import asyncio
 import logging
@@ -72,6 +77,10 @@ SENSOR_TYPES = {
         "mdi:thermometer",
     ],
     "hotend_2_id": ["Hotend 2 id", "", "mdi:printer-3d-nozzle-outline"],
+    "active_material_1_guid": ["Filament 1 type", "", "mdi:tape-drive"],
+    "active_material_2_guid": ["Filament 2 type", "", "mdi:tape-drive"],
+    "active_material_1_length_remaining": ["Filament 1 length remaining", "m", "mdi:tape-drive"],
+    "active_material_2_length_remaining": ["Filament 2 length remaining", "m", "mdi:tape-drive"],
 }
 
 CONF_DECIMAL = "decimal"
@@ -90,6 +99,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=10)
 BASE_URL = "http://{0}/api/v1"
+MATERIAL_URL = "http://{0}/cluster-api/v1/materials"
 
 
 async def async_setup_platform(
@@ -267,5 +277,16 @@ class UltimakerStatusSensor(Entity):
                             self._state = temperature.get("current", None)
                     if "id" in self._type and hot_end:
                         self._state = hot_end["id"]
+                        
+            elif "active_material" in self._type:
+                head = data.get("heads", [None])[0]
+                if head:
+                    idx = int(self._type.split("_")[2]) - 1
+                    extruder = head["extruders"][idx]
+                    active_material = extruder["active_material"]
+                    if "guid" in self._type and active_material:
+                        self._state = active_material["guid"]
+                    if "length_remaining" in self._type and active_material:
+                        self._state = active_material["length_remaining"] / 1000
 
             _LOGGER.debug(f"Device: {self._type} State: {self._state}")
