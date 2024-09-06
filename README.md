@@ -51,6 +51,10 @@ sensor:
       - hotend_2_id  # optional
       - hotend_2_temperature  # optional
       - hotend_2_temperature_target  # optional
+      - active_material_1_guid # optional
+      - active_material_1_length_remaining # optional
+      - active_material_2_guid # optional
+      - active_material_2_length_remaining # optional
 ```
 
 add a camera to the configuration.yaml
