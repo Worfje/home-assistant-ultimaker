@@ -14,6 +14,8 @@ Adds support for the following ultimaker printer sensors:
 - Bed type (glass, ...)
 - Bed temperature
 - Bed target temperature
+- Filament type
+- Filament remaining length
 
 # Install
 
